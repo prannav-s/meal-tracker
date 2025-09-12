@@ -8,7 +8,6 @@ const mealSchema = new Schema({
         enum: ['Breakfast', 'Lunch', 'Dinner', 'Snack'],
     },
     foods: [{
-        _id: false,
         food: { type: Schema.Types.ObjectId, ref: 'Food', required: true },
         quantity: { type: Number, min: 1, default: 1 },
     }],

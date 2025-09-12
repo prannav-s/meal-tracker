@@ -13,13 +13,44 @@ export const getAllFoods = async (req, res) => {
 
 export const createFood = async (req, res) => {
     try {
-        const { name, calories, protein, carbs, fats } = req.body;
-        const food = new Food({ name, calories, protein, carbs, fats });
+        const { name, calories, protein, carbs, fats, tags, brand } = req.body;
+        const food = new Food({ name, calories, protein, carbs, fats, tags, brand });
         await food.save();
         res.status(201).json(food);
     } catch (error) {
         console.error("Error creating food:", error);
         res.status(500).json({ message: "Error creating food" });
+    }
+}
+
+export async function deleteFood(req, res) {
+    try {
+        const {foodId} = req.params;
+        const food = await Food.findByIdAndDelete(foodId);
+        if (!food) {
+            return res.status(404).json({ message: "Food not found" });
+        }
+        res.status(200).json({ message: "Food deleted" });
+
+    }
+    catch(error) {
+        res.status(500).json({message: "Error deleting food"})
+    }
+}
+export async function updateFood(req, res) {
+    try {
+        const {foodId} = req.params;
+        const { name, calories, protein, carbs, fats, tags, brand } = req.body;
+        const food = await Food.findByIdAndUpdate(foodId, { name, calories, protein, carbs, fats, tags, brand }, {new: true});
+        if (!food) {
+            return res.status(404).json({ message: "Food not found" });
+        }
+        res.status(200).json({food});
+
+    }
+    catch(error) {
+        res.status(500).json({message: "Error updating food"})
+        console.log(error)
     }
 }
 

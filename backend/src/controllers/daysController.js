@@ -208,3 +208,64 @@ export async function addFoodToMeal(req, res) {
         res.status(500).json({ message: "Error adding food to meal" });
     }
 }
+
+export async function updateFoodInMeal(req, res) {
+    try {
+        const { date, mealName, entryId } = req.params;
+        const { foodId, quantity } = req.body;
+        const day = await Day.findOne({ date });
+        if (!day) {
+            return res.status(404).json({ message: "Day not found" });
+        }
+        const meal = await Meal.findOne({ name: mealName, day: day._id });
+        if (!meal) {
+            return res.status(404).json({ message: "Meal not found" });
+        }
+        if (!foodId) {
+            return res.status(404).json({ message: "Food Id is required" });
+        }
+        if (!quantity) {
+            return res.status(400).json({ message: "Quantity is required" });
+        }
+        const foodExists = await Food.findById(foodId);
+        if (!foodExists) {
+            return res.status(404).json({ message: "Food not found" });
+        }
+        const foodEntry = meal.foods.id(entryId);
+        if (!foodEntry) {
+            return res.status(404).json({ message: "Food entry not found in meal" });
+        }
+        foodEntry.food = foodId;
+        foodEntry.quantity = quantity;
+        await meal.save();
+        res.status(200).json(meal);
+    } 
+    catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Error updating food in meal" });
+    }
+}
+
+export async function deleteFoodFromMeal(req, res) {
+    try {
+        const { date, mealName, entryId } = req.params;
+        const day = await Day.findOne({ date });
+        if (!day) {
+            return res.status(404).json({ message: "Day not found" });
+        }
+        const meal = await Meal.findOne({ name: mealName, day: day._id });
+        if (!meal) {
+            return res.status(404).json({ message: "Meal not found" });
+        }
+        const foodEntry = meal.foods.id(entryId);
+        if (!foodEntry) {
+            return res.status(404).json({ message: "Food entry not found in meal" });
+        }
+        meal.foods.remove(foodEntry);
+        await meal.save();
+        res.status(200).json(meal);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Error deleting food from meal" });
+    }
+}
