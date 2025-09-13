@@ -1,6 +1,7 @@
 import Day from "../models/Day.js";
 import Meal from "../models/Meal.js";
 import Food from "../models/Food.js";
+import { formatYMD } from "../../../frontend/src/lib/utils.js";
 
 export async function getAllDays(_, res) {
     try {
@@ -80,7 +81,7 @@ export async function createMealForDay(req, res) {
     }
     const day = await Day.findOne({ date });
     if (await Meal.findOne({ day: day._id, name })) {
-        return res.status(409).json({ message: `Meal '${name}' already exists for ${date}` });
+        return res.status(409).json({ message: `Meal '${name}' already exists for ${formatYMD(date)}` });
     }
 
     if (!day) {
@@ -150,7 +151,7 @@ export async function updateMealForDay(req, res) {
     }
 
     if (day.meals.some(meal => meal.name === name)) {
-        return res.status(409).json({ message: `Meal '${name}' already exists for ${date}` });
+        return res.status(409).json({ message: `Meal '${name}' already exists for ${formatYMD(date)}` });
     }
     const meal = await Meal.findOneAndUpdate({ name: mealName, day: day._id }, { name }, { new: true });
     res.status(200).json(meal);

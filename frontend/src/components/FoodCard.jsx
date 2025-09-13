@@ -1,0 +1,73 @@
+import React, { useState } from 'react'
+import { Link } from 'react-router'
+import api from '../lib/axios.js'
+import { PlusIcon, Trash2Icon } from 'lucide-react'
+
+
+
+const FoodCard = ({ food, setFoods }) => {
+  const [deleting, setDeleting] = useState(false)
+
+  const refreshFoods = async () => {
+    if (!setFoods) return
+    const res = await api.get(`/foods`)
+    setFoods(res.data)
+  }
+
+  const handleDelete = async (e, id) => {
+    e.preventDefault()
+    if (!window.confirm('Delete this food?')) return
+    try {
+      setDeleting(true)
+      await api.delete(`/foods/${id}`)
+      toast.success('Food deleted')
+      navigate('/foods')
+    } catch (e) {
+      toast.error('Failed to delete food')
+      console.error(e)
+    } finally {
+      setDeleting(false)
+      refreshFoods()
+    }
+  }
+
+
+  return (
+    <Link to={`/foods/${food._id}`} className='card bg-base-200 border border-base-content/10 shadow-sm'>
+      <div className='card-body gap-3'>
+        <div className='flex items-start justify-between gap-3'>
+          <div className='min-w-0 flex-1'>
+            <div className='text-lg font-semibold truncate'>{food?.name}</div>
+            <div className='text-sm text-base-content/70'>
+              {food.calories} kcal • P {food.protein}g • C {food.carbs}g • F {food.fat}g
+            </div>
+          </div>
+          {food?.brand && (
+            <div className='text-sm text-base-content/60 shrink-0 ml-2'>{food.brand}</div>
+          )}
+            <button
+              className={`btn btn-ghost btn-xs text-error ${deleting ? 'loading' : ''}`}
+              onClick={(e) => handleDelete(e, food._id)}
+              disabled={deleting}
+            >
+              {deleting ? '' : <Trash2Icon className='size-5' />}
+            </button>
+        </div>
+
+        <div className='divider my-1' />
+
+        {(food?.tags?.length ?? 0) === 0 ? (
+          <div className='text-base-content/60 text-sm'>No tags added yet.</div>
+        ) : (
+          <div className='flex flex-wrap gap-2'>
+            {food.tags.map((tag, idx) => (
+              <span key={idx} className='badge'>{tag}</span>
+            ))}
+          </div>
+        )}
+      </div>
+    </Link>
+  )
+}
+
+export default FoodCard

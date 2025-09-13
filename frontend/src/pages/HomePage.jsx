@@ -1,5 +1,8 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useParams } from 'react-router'
 import Navbar from '../components/Navbar'
+import MealCard from '../components/MealCard'
+import MealsNotFound from '../components/MealsNotFound'
 import toast from 'react-hot-toast';
 import api from '../lib/axios.js';
 
@@ -8,32 +11,46 @@ const HomePage = () => {
   const [meals, setMeals] = useState([])
   const [loading, setLoading] = useState(true)
 
+  const { date: routeDate } = useParams();
+  const date = routeDate || new Date().toISOString().split("T")[0];
+
   useEffect(() => {
     const fetchMeals = async () => {
       try {
-        const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
-        const res = await api.get(`/days/${today}/meals`);
-        console.log(res.data);
+        const res = await api.get(`/days/${date}/meals`);
         setMeals(res.data);
       } catch (error) {
-        console.log("Error fetching meals")
+        if (error.response && error.response.status === 404) {
+          try {
+            // Create the day if it doesn’t exist
+            await api.post("/days", { date });
+            // Fetch meals again (should now exist, possibly empty)
+            const res = await api.get(`/days/${date}/meals`);
+            setMeals(res.data);
+          } catch (createErr) {
+            toast.error(`Failed to create entry for ${date}`);
+          }
+        } else {
+          toast.error("Error fetching meals");
+        }
+      } finally {
+        setLoading(false);
       }
-      finally {
-        setLoading(false)
-      }
-    }
+    };
     fetchMeals();
-  }, [])
+  }, [date]);
+
   return (
     <div className='min-h-screen'>
       <Navbar />
       <div className='max-w-7xl mx-auto p-4 mt-6'>
-        {loading && <div className='text-center text-prmary py-10'>Loading meals...</div>}
+        {loading && <div className='text-center text-primary py-10'>Loading meals...</div>}
+        {meals.length === 0 && <MealsNotFound/>}
         {meals.length > 0 && (
-          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-            {meals.map((note) => (
-              <div>
-                <NoteCard key = { note.id } note = { note } setMeals={setMeals}/>
+          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6'>
+            {meals.map((meal) => (
+              <div key={meal._id || meal.id}>
+                <MealCard meal={meal} setMeals={setMeals} />
               </div>
             ))}
           </div>
