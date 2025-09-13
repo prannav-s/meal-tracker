@@ -27,7 +27,7 @@ const CreateMeal = () => {
         name: mealName
       })
       toast.success("Meal created successfully")
-      navigate(`/day/${date}`)
+      navigate(`/${date}`)
     } catch (error) {
         if (error.response.status === 409) {
             toast.error(`${mealName} already exists for ${formatYMD(date)}, try adding food there`, {
@@ -54,7 +54,7 @@ const CreateMeal = () => {
     <div className='min-h-screen bg-base-200'>
       <div className='container mx-auto px-4 py-8'>
         <div className='max-w-3xl mx-auto'>
-          <Link to={"/"} className='btn btn-ghost mb-4'>
+          <Link to={`/${date}`} className='btn btn-ghost mb-4'>
             <ArrowLeftIcon className='size-5' />
             Back
           </Link>
