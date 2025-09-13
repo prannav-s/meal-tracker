@@ -116,7 +116,7 @@ const MealDetails = () => {
         ) : (
           <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
             <div className='lg:col-span-2'>
-              <div className='card bg-base-200 border border-base-content/10'>
+              <div className='card bg-base-100 border border-base-content/10'>
                 <div className='card-body'>
                   <div className='flex items-center justify-between'>
                     <div className='flex items-center gap-3'>
@@ -169,7 +169,7 @@ const MealDetails = () => {
             </div>
 
             <div className='lg:col-span-1'>
-              <div className='card bg-base-200 border border-base-content/10'>
+              <div className='card bg-base-100 border border-base-content/10'>
                 <div className='card-body gap-4'>
                   <h3 className='text-lg font-semibold'>Add Foods</h3>
                   <input

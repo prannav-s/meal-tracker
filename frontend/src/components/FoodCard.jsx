@@ -33,7 +33,7 @@ const FoodCard = ({ food, setFoods }) => {
 
 
   return (
-    <Link to={`/foods/${food._id}`} className='card bg-base-200 border border-base-content/10 shadow-sm'>
+    <Link to={`/foods/${food._id}`} className='card bg-base-100 border border-base-content/10 shadow-sm'>
       <div className='card-body gap-3'>
         <div className='flex items-start justify-between gap-3'>
           <div className='min-w-0 flex-1'>
@@ -61,7 +61,7 @@ const FoodCard = ({ food, setFoods }) => {
         ) : (
           <div className='flex flex-wrap gap-2'>
             {food.tags.map((tag, idx) => (
-              <span key={idx} className='badge'>{tag}</span>
+              <span key={idx} className='badge badge-primary'>{tag}</span>
             ))}
           </div>
         )}

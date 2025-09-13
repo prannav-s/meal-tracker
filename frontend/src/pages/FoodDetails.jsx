@@ -90,14 +90,14 @@ const FoodDetailsPage = () => {
 
   if (loading) {
     return (
-      <div className='min-h-screen bg-base-200 flex items-center justify-center'>
+      <div className='min-h-screen bg-base-100 flex items-center justify-center'>
         <LoaderIcon className='size-10 text-primary animate-spin' />
       </div>
     )
   }
 
   return (
-    <div className='min-h-screen bg-base-200'>
+    <div className='min-h-screen bg-base-100'>
       <div className='container mx-auto px-4 py-8'>
         <div className='max-w-2xl mx-auto'>
           <div className='flex items-center justify-between mb-6'>

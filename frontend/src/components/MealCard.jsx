@@ -52,7 +52,7 @@ const MealCard = ({ meal, setMeals }) => {
   }
 
   return (
-    <Link to={`/${date}/${encodeURIComponent(meal.name)}`} className='card bg-base-200 border border-base-content/10 shadow-sm'>
+    <Link to={`/${date}/${encodeURIComponent(meal.name)}`} className='card bg-base-100 border border-base-content/10 shadow-sm'>
       <div className='card-body gap-4'>
         <div className='flex items-center justify-between'>
           <div className='flex items-center gap-3'>
