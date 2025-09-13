@@ -24,8 +24,13 @@ app.use((req, res, next) => {
     console.log(`${req.method} ${req.url}`)
     next();
 })
-
-app.use("/api", api);
+if (process.env.NODE_ENV === "production") {
+    app.use("/api", api);
+    app.use(express.static(path.join(__dirname,"../frontend/dist")))
+    app.get("*", (req, res) => {
+        res.sendFile(path.join(__dirname,"../frontend/dist/index.html"))
+    });
+}
 
 // if (process.env.NODE_ENV === "production") {
 //     app.use(express.static(path.join(__dirname, "../frontend/dist")));
