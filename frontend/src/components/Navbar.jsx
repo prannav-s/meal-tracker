@@ -1,6 +1,6 @@
 import React, { useRef } from 'react'
-import { Link, useNavigate, useParams } from 'react-router'
-import { EyeIcon, PlusIcon, HouseIcon, CalendarIcon, Sun, Moon } from 'lucide-react'
+import { Link, useNavigate, useParams, useLocation } from 'react-router'
+import { EyeIcon, PlusIcon, HouseIcon, CalendarIcon, Sun, Moon, PizzaIcon } from 'lucide-react'
 import { formatYMD } from "../lib/utils"
 import { useEffect, useState } from 'react'
 
@@ -10,6 +10,7 @@ const Navbar = () => {
   const navigate = useNavigate()
   const { date: routeDate } = useParams();
   const date = routeDate || new Date().toISOString().split("T")[0];
+  const location = useLocation()
 
   const openDatePicker = () => {
     const el = dateInputRef.current
@@ -43,9 +44,7 @@ const Navbar = () => {
     setTheme(next)
   }
 
-  // const toggleView = () => { work in progress
-  //   const view =  === ''
-  // }
+  const onFoods = location.pathname.startsWith('/foods')
 
   return (
     <header className='bg-base-100 border-b border-base-content/10'>
@@ -76,9 +75,9 @@ const Navbar = () => {
                     <PlusIcon className='size-5'/>
                     <span>New Meal</span>
                     </Link>
-                    <Link to={"/foods"} className='btn btn-primary'>
-                    <EyeIcon className='size-5'/>
-                    <span>View Foods</span> 
+                    <Link to={onFoods ? `/${date}` : "/foods"} className='btn btn-primary'>
+                      {onFoods ? <EyeIcon className='size-5'/> : <PizzaIcon className='size-5'/>}
+                      <span>{onFoods ? 'View Meals' : 'View Foods'}</span>
                     </Link>
                 </div>
             </div>
