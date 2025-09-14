@@ -20,7 +20,6 @@ const FoodCard = ({ food, setFoods }) => {
       setDeleting(true)
       await api.delete(`/foods/${id}`)
       toast.success('Food deleted')
-      navigate('/foods')
     } catch (e) {
       toast.error('Failed to delete food')
       console.error(e)
