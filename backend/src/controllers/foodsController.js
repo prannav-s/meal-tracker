@@ -3,7 +3,9 @@ import Food from "../models/Food.js";
 
 export const getAllFoods = async (req, res) => {
     try {
-        const foods = await Food.find().sort({ name: 1 });
+        const userId = req.auth?.userId;
+        if (!userId) return res.status(401).json({ message: 'Unauthorized' });
+        const foods = await Food.find({ userId }).sort({ name: 1 });
         res.status(200).json(foods);
     } catch (error) {
         console.error("Error fetching foods:", error);
@@ -13,8 +15,10 @@ export const getAllFoods = async (req, res) => {
 
 export const getFoodById = async (req, res) => {
     try {
+        const userId = req.auth?.userId;
+        if (!userId) return res.status(401).json({ message: 'Unauthorized' });
         const { foodId } = req.params;
-        const food = await Food.findById(foodId);
+        const food = await Food.findOne({ _id: foodId, userId });
         if (!food) {
             return res.status(404).json({ message: "Food not found" });
         }
@@ -27,8 +31,10 @@ export const getFoodById = async (req, res) => {
 
 export const createFood = async (req, res) => {
     try {
+        const userId = req.auth?.userId;
+        if (!userId) return res.status(401).json({ message: 'Unauthorized' });
         const { name, calories, protein, carbs, fat, tags, brand } = req.body;
-        const food = new Food({ name, calories, protein, carbs, fat, tags, brand });
+        const food = new Food({ userId, name, calories, protein, carbs, fat, tags, brand });
         await food.save();
         res.status(201).json(food);
     } catch (error) {
@@ -39,8 +45,10 @@ export const createFood = async (req, res) => {
 
 export async function deleteFood(req, res) {
     try {
+        const userId = req.auth?.userId;
+        if (!userId) return res.status(401).json({ message: 'Unauthorized' });
         const {foodId} = req.params;
-        const food = await Food.findByIdAndDelete(foodId);
+        const food = await Food.findOneAndDelete({ _id: foodId, userId });
         if (!food) {
             return res.status(404).json({ message: "Food not found" });
         }
@@ -54,10 +62,12 @@ export async function deleteFood(req, res) {
 }
 export async function updateFood(req, res) {
     try {
+        const userId = req.auth?.userId;
+        if (!userId) return res.status(401).json({ message: 'Unauthorized' });
         const {foodId} = req.params;
         const { name, calories, protein, carbs, fat, tags, brand } = req.body;
-        const food = await Food.findByIdAndUpdate(
-            foodId,
+        const food = await Food.findOneAndUpdate(
+            { _id: foodId, userId },
             { name, calories, protein, carbs, fat, tags, brand },
             { new: true }
         );

@@ -22,9 +22,7 @@ const HomePage = () => {
       } catch (error) {
         if (error.response && error.response.status === 404) {
           try {
-            // Create the day if it doesn’t exist
             await api.post("/days", { date });
-            // Fetch meals again (should now exist, possibly empty)
             const res = await api.get(`/days/${date}/meals`);
             setMeals(res.data);
           } catch (createErr) {

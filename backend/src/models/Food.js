@@ -2,6 +2,7 @@ import mongoose, { Schema } from "mongoose";
 
 const FoodSchema = new Schema(
   {
+    userId: { type: String, required: true, index: true },
     name: { type: String, required: true, trim: true },
     calories: { type: Number, min: 0, required: true },
     protein: { type: Number, min: 0, default: 0, required: true },
@@ -12,6 +13,8 @@ const FoodSchema = new Schema(
   },
   { timestamps: true }
 );
+
+FoodSchema.index({ userId: 1, name: 1, brand: 1 }, { unique: false });
 
 const Food = mongoose.model("Food", FoodSchema);
 export default Food;

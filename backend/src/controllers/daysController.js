@@ -1,55 +1,64 @@
 import Day from "../models/Day.js";
 import Meal from "../models/Meal.js";
 import Food from "../models/Food.js";
-import { formatYMD } from "../../../frontend/src/lib/utils.js";
 
-export async function getAllDays(_, res) {
+export async function getAllDays(req, res) {
     try {
-        const days = await Day.find().populate("meals").sort({ date: -1 });
+        const userId = req.auth?.userId;
+        if (!userId) return res.status(401).json({ message: 'Unauthorized' });
+        const days = await Day.find({ userId }).populate("meals").sort({ date: -1 });
         res.status(200).json(days);
     } catch (error) {
-        console.log(error);
+        console.log("Error getting all days", error);
         res.status(500).json({ message: "Error fetching days" });
     }
 }
 
 export async function createDay(req, res) {
     const { date } = req.body;
+    const userId = req.auth?.userId;
+    if (!userId) return res.status(401).json({ message: 'Unauthorized' });
     if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
         return res.status(400).json({ message: "Invalid or missing date. Use YYYY-MM-DD format." });
     }
     try {
-        const existingDay = await Day.findOne({ date });
+        const existingDay = await Day.findOne({ userId, date });
         if (existingDay) {
             return res.status(400).json({ message: "Day already exists" });
         }
-        const newDay = new Day({ date, meals: [] });
+        const newDay = new Day({ userId, date, meals: [] });
         await newDay.save();
         res.status(201).json(newDay);
     } catch (error) {
         res.status(500).json({ message: "Error creating day" });
+        console.log("Error creating day", error)
     }
 }
 
 export async function getDayByDate(req, res) {
     try {
-        const day = await Day.findOne({ date: req.params.date }).populate("meals");
+        const userId = req.auth?.userId;
+        if (!userId) return res.status(401).json({ message: 'Unauthorized' });
+        const day = await Day.findOne({ userId, date: req.params.date }).populate("meals");
         if (!day) {
             return res.status(404).json({ message: "Day not found" });
         }
         res.status(200).json(day);
     } catch (error) {
         res.status(500).json({ message: "Error fetching day" });
+        console.log("Error getting day", error)
     }
 }
 
 export async function updateDay(req, res) {
     const { date } = req.body;
+    const userId = req.auth?.userId;
+    if (!userId) return res.status(401).json({ message: 'Unauthorized' });
     if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
         return res.status(400).json({ message: "Invalid or missing date. Use YYYY-MM-DD format." });
     }
     try {
-        const day = await Day.findOneAndUpdate({ date: req.params.date }, { date }, { new: true });
+        const day = await Day.findOneAndUpdate({ userId, date: req.params.date }, { date }, { new: true });
         if (!day) {
             return res.status(404).json({ message: "Day not found" });
         }
@@ -60,7 +69,9 @@ export async function updateDay(req, res) {
 }
 export async function deleteDay(req, res) {
     try {
-        const day = await Day.findOneAndDelete({ date: req.params.date });
+        const userId = req.auth?.userId;
+        if (!userId) return res.status(401).json({ message: 'Unauthorized' });
+        const day = await Day.findOneAndDelete({ userId, date: req.params.date });
         if (!day) {
             return res.status(404).json({ message: "Day not found" });
         }
@@ -74,14 +85,16 @@ export async function createMealForDay(req, res) {
     try {
     const { date } = req.params;
     const { name, foods } = req.body;
+    const userId = req.auth?.userId;
+    if (!userId) return res.status(401).json({ message: 'Unauthorized' });
 
 
     if (!name || !['Breakfast', 'Lunch', 'Dinner', 'Snack'].includes(name)) {
         return res.status(400).json({ message: "Invalid or missing meal name" });
     }
-    const day = await Day.findOne({ date });
-    if (await Meal.findOne({ day: day._id, name })) {
-        return res.status(409).json({ message: `Meal '${name}' already exists for ${formatYMD(date)}` });
+    const day = await Day.findOne({ userId, date });
+    if (await Meal.findOne({ day: day?._id, name })) {
+        return res.status(409).json({ message: `Meal '${name}' already exists for ${date}` });
     }
 
     if (!day) {
@@ -102,7 +115,10 @@ export async function createMealForDay(req, res) {
 export async function getMealsForDay(req, res) {
     try {
     const { date } = req.params;
-    const day = await Day.findOne({ date }).populate({
+    const userId = req.auth?.userId;
+    console.log(userId);
+    if (!userId) return res.status(401).json({ message: 'Unauthorized' });
+    const day = await Day.findOne({ userId, date }).populate({
         path: 'meals',
         populate: { path: 'foods.food', model: 'Food' }
     });
@@ -111,7 +127,7 @@ export async function getMealsForDay(req, res) {
     }
     res.status(200).json(day.meals);
     } catch (error) {
-        console.log(error);
+        console.log("Error getting meals for day", error);
         res.status(500).json({ message: "Error fetching meals for day" });
     }
 }
@@ -119,7 +135,9 @@ export async function getMealsForDay(req, res) {
 export async function getMealByName(req, res) {
     try {
     const { date, mealName } = req.params;
-    const day = await Day.findOne({ date });
+    const userId = req.auth?.userId;
+    if (!userId) return res.status(401).json({ message: 'Unauthorized' });
+    const day = await Day.findOne({ userId, date });
     if (!day) {
         return res.status(404).json({ message: "Day not found" });
     }
@@ -141,17 +159,19 @@ export async function updateMealForDay(req, res) {
     try {
     const { date, mealName } = req.params;
     const { name } = req.body;
+    const userId = req.auth?.userId;
+    if (!userId) return res.status(401).json({ message: 'Unauthorized' });
 
     if (!name || !['Breakfast', 'Lunch', 'Dinner', 'Snack'].includes(name)) {
         return res.status(400).json({ message: "Invalid or missing meal name" });
     }
-    const day = await Day.findOne({ date }).populate("meals");
+    const day = await Day.findOne({ userId, date }).populate("meals");
     if (!day) {
         return res.status(404).json({ message: "Day not found" });
     }
 
     if (day.meals.some(meal => meal.name === name)) {
-        return res.status(409).json({ message: `Meal '${name}' already exists for ${formatYMD(date)}` });
+        return res.status(409).json({ message: `Meal '${name}' already exists for ${date}` });
     }
     const meal = await Meal.findOneAndUpdate({ name: mealName, day: day._id }, { name }, { new: true });
     res.status(200).json(meal);
@@ -163,7 +183,9 @@ export async function updateMealForDay(req, res) {
 export async function deleteMealFromDay(req, res) {
     try {
     const { date, mealName } = req.params;
-    const day = await Day.findOne({ date });
+    const userId = req.auth?.userId;
+    if (!userId) return res.status(401).json({ message: 'Unauthorized' });
+    const day = await Day.findOne({ userId, date });
     if (!day) {
         return res.status(404).json({ message: "Day not found" });
     }
@@ -184,8 +206,10 @@ export async function addFoodToMeal(req, res) {
     try {
         const { date, mealName } = req.params;
         const { foodId, quantity } = req.body;
+        const userId = req.auth?.userId;
+        if (!userId) return res.status(401).json({ message: 'Unauthorized' });
 
-        const day = await Day.findOne({ date });
+        const day = await Day.findOne({ userId, date });
         if (!day) {
             return res.status(404).json({ message: "Day not found" });
         }
@@ -197,7 +221,7 @@ export async function addFoodToMeal(req, res) {
         if (meal.foods.some(f => f.food?.toString() === foodId)) {
             return res.status(409).json({ message: "Food already exists in meal" });
         }
-        const foodExists = await Food.findById(foodId);
+        const foodExists = await Food.findOne({ _id: foodId, userId });
         if (!foodExists) {
             return res.status(404).json({ message: "Food not found" });
         }
@@ -214,7 +238,9 @@ export async function updateFoodInMeal(req, res) {
     try {
         const { date, mealName, entryId } = req.params;
         const { foodId, quantity } = req.body;
-        const day = await Day.findOne({ date });
+        const userId = req.auth?.userId;
+        if (!userId) return res.status(401).json({ message: 'Unauthorized' });
+        const day = await Day.findOne({ userId, date });
         if (!day) {
             return res.status(404).json({ message: "Day not found" });
         }
@@ -228,7 +254,7 @@ export async function updateFoodInMeal(req, res) {
         if (!quantity) {
             return res.status(400).json({ message: "Quantity is required" });
         }
-        const foodExists = await Food.findById(foodId);
+        const foodExists = await Food.findOne({ _id: foodId, userId });
         if (!foodExists) {
             return res.status(404).json({ message: "Food not found" });
         }
@@ -250,7 +276,9 @@ export async function updateFoodInMeal(req, res) {
 export async function deleteFoodFromMeal(req, res) {
     try {
         const { date, mealName, entryId } = req.params;
-        const day = await Day.findOne({ date });
+        const userId = req.auth?.userId;
+        if (!userId) return res.status(401).json({ message: 'Unauthorized' });
+        const day = await Day.findOne({ userId, date });
         if (!day) {
             return res.status(404).json({ message: "Day not found" });
         }

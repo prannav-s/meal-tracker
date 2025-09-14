@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams, useLocation } from 'react-router'
 import { EyeIcon, PlusIcon, HouseIcon, CalendarIcon, Sun, Moon, PizzaIcon } from 'lucide-react'
 import { formatYMD } from "../lib/utils"
 import { useEffect, useState } from 'react'
+import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/clerk-react'
 
 const Navbar = () => {
   const dateInputRef = useRef(null)
@@ -79,6 +80,14 @@ const Navbar = () => {
                       {onFoods ? <EyeIcon className='size-5'/> : <PizzaIcon className='size-5'/>}
                       <span>{onFoods ? 'View Meals' : 'View Foods'}</span>
                     </Link>
+                    <SignedOut>
+                      <SignInButton mode='modal'>
+                        <button className='btn btn-outline btn-sm'>Sign In</button>
+                      </SignInButton>
+                    </SignedOut>
+                    <SignedIn>
+                      <UserButton appearance={{ elements: { userButtonAvatarBox: 'size-8' } }} />
+                    </SignedIn>
                 </div>
             </div>
         </div>

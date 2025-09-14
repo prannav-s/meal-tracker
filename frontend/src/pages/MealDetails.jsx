@@ -194,7 +194,7 @@ const MealDetails = () => {
                           {Array.isArray(f.tags) && f.tags.length > 0 && (
                             <div className='flex flex-wrap gap-1 mt-1'>
                               {f.tags.map((t, idx) => (
-                                <span key={idx} className='badge badge-ghost badge-xs'>{t}</span>
+                                <span key={idx} className='badge badge-accent badge-xs'>{t}</span>
                               ))}
                             </div>
                           )}
