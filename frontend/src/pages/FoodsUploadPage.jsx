@@ -124,7 +124,7 @@ const FoodsUploadPage = () => {
         <div className='card border border-base-content/10 bg-base-100 shadow-sm'>
           <div className='card-body space-y-6'>
             <div className='space-y-2 text-center sm:text-left'>
-              <h1 className='text-2xl font-bold text-primary'>Take a photo of a meal or nutrition label</h1>
+              <h1 className='text-2xl font-bold text-primary'>Scan your food</h1>
               <p className='text-sm text-base-content/70'>
                 Upload a clear photo of an ingredients list, meal, or nutrition label. We will extract foods for you and add them to your library.
               </p>
