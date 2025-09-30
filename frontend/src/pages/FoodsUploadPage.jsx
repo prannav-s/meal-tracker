@@ -171,7 +171,7 @@ const FoodsUploadPage = () => {
               </button>
               <button
                 type='button'
-                className={`btn btn-primary gap-2 ${uploading ? 'loading' : ''}`}
+                className={`btn btn-primary gap-2`}
                 onClick={uploadImage}
                 disabled={uploading}
               >
