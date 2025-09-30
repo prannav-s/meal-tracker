@@ -1,5 +1,5 @@
 import { PizzaIcon, PlusIcon } from "lucide-react";
-import { Link, useParams, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import toast from 'react-hot-toast';
 import api from '../lib/axios.js';
 
@@ -17,8 +17,9 @@ const FoodsNotFound = () => {
                 duration: 4000,
                 icon: "❌"
             })
-            console.log("Error creating food", error)
-
+            if (import.meta.env.DEV) {
+              console.error('Error creating food', error)
+            }
         }
     }
   return (
@@ -30,10 +31,12 @@ const FoodsNotFound = () => {
       <p className="text-base-content/70">
         Create a food to start tracking!
       </p>
-        <button className='btn btn-sm btn-ghost'
-          onClick={createNewFood}>
+        <button
+          className='btn btn-primary w-full justify-center gap-2 sm:w-auto'
+          onClick={createNewFood}
+        >
           <PlusIcon className='size-4' />
-          Add Food
+          <span>Add Food</span>
         </button>
     </div>
   );

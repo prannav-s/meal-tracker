@@ -54,16 +54,22 @@ const FoodsPage = () => {
   return (
     <div className='min-h-screen'>
       <Navbar />
-      <div className='max-w-7xl mx-auto p-4 mt-6'>
-       {foods.length > 0 && ( <button className='btn btn-sm btn-ghost'
-          onClick={createNewFood}>
-          <PlusIcon className='size-4' />
-          Add Food
-        </button> )}
+      <div className='mx-auto mt-6 max-w-7xl px-4 pb-8'>
+       {foods.length > 0 && (
+        <div className='mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-end'>
+          <button
+            className='btn btn-ghost btn-sm w-full justify-center gap-2 sm:w-auto'
+            onClick={createNewFood}
+          >
+            <PlusIcon className='size-4' />
+            <span>Add Food</span>
+          </button>
+        </div>
+       )}
         {loading && <div className='text-center text-prmary py-10'>Loading foods...</div>}
         {foods.length === 0 && <FoodsNotFound />}
         {foods.length > 0 && (
-          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+          <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
             {foods.map((food) => (
               <div key={food._id || food.id}>
                 <FoodCard food={food} setFoods={setFoods} />

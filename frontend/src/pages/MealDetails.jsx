@@ -118,14 +118,14 @@ const MealDetails = () => {
             <div className='lg:col-span-2'>
               <div className='card bg-base-100 border border-base-content/10'>
                 <div className='card-body'>
-                  <div className='flex items-center justify-between'>
-                    <div className='flex items-center gap-3'>
-                      <h2 className='text-2xl font-bold'>{meal?.name}</h2>
-                      <div className='text-sm text-base-content/70'>
+                  <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
+                    <div className='flex flex-col items-start gap-1 sm:flex-row sm:items-center sm:gap-3'>
+                      <h2 className='text-2xl font-bold leading-tight'>{meal?.name}</h2>
+                      <div className='text-sm text-base-content/70 leading-snug'>
                         {formatYMD(date)}
                       </div>
                     </div>
-                    <div className='text-sm text-base-content/70'>
+                    <div className='text-sm text-base-content/70 leading-snug sm:text-right'>
                       {totals.calories} kcal • P {totals.protein}g • C {totals.carbs}g • F {totals.fat}g
                     </div>
                   </div>
@@ -140,14 +140,14 @@ const MealDetails = () => {
                         const f = entry.food || {}
                         const q = entry.quantity ?? 1
                         return (
-                          <div key={entry._id} className='flex items-center justify-between'>
+                          <div key={entry._id} className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
                             <div className='min-w-0'>
                               <div className='font-medium truncate'>{f.name}</div>
                               <div className='text-xs text-base-content/60 truncate'>
                                 {f.brand ? `${f.brand} • ` : ''}Qty {q}
                               </div>
                             </div>
-                            <div className='flex items-center gap-4'>
+                            <div className='flex flex-wrap items-center gap-3 sm:flex-nowrap sm:gap-4'>
                               <div className='text-sm tabular-nums text-base-content/80'>
                                 {Math.round((f.calories || 0) * q)} kcal
                               </div>
@@ -180,9 +180,9 @@ const MealDetails = () => {
                     className='input input-bordered w-full'
                   />
 
-                  <div className='max-h-96 overflow-auto pr-2 space-y-3'>
+                  <div className='max-h-96 space-y-3 overflow-auto pr-2'>
                     {filteredFoods.map((f) => (
-                      <div key={f._id} className='flex items-center justify-between gap-3'>
+                      <div key={f._id} className='flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between'>
                         <div className='min-w-0 flex-1'>
                           <div className='font-medium truncate'>{f.name}</div>
                           <div className='text-xs text-base-content/60 truncate'>
@@ -199,7 +199,7 @@ const MealDetails = () => {
                             </div>
                           )}
                         </div>
-                        <div className='flex items-center gap-2'>
+                        <div className='flex w-full items-center gap-2 sm:w-auto sm:justify-end'>
                           <input
                             type='number'
                             min={1}
@@ -210,7 +210,7 @@ const MealDetails = () => {
                             }
                           />
                           <button
-                            className={`btn btn-xs btn-primary ${addingId === f._id ? 'loading' : ''}`}
+                            className={`btn btn-primary btn-xs ${addingId === f._id ? 'loading' : ''}`}
                             onClick={() => handleAddFood(f._id)}
                           >
                             {addingId === f._id ? '' : <PlusIcon className='size-3' />} Add

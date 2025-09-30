@@ -33,12 +33,14 @@ const FoodCard = ({ food, setFoods }) => {
   return (
     <Link to={`/foods/${food._id}`} className='card bg-base-100 border border-base-content/10 shadow-sm'>
       <div className='card-body gap-3'>
-        <div className='grid grid-cols-[1fr_auto_auto] items-start gap-3'>
+        <div className='grid grid-cols-[1fr_auto] items-start gap-3 sm:grid-cols-[1fr_auto_auto]'>
           <div className='min-w-0'>
             <div className='text-lg font-semibold truncate'>{food?.name}</div>
           </div>
           {food?.brand && (
-            <div className='text-sm text-base-content/60 ml-2'>{food.brand}</div>
+            <div className='col-span-full text-sm text-base-content/60 leading-snug sm:col-span-1 sm:ml-2 sm:self-center sm:text-right'>
+              {food.brand}
+            </div>
           )}
           <button
             className={`btn btn-ghost btn-xs justify-self-end text-error ${deleting ? 'loading' : ''}`}
@@ -47,7 +49,7 @@ const FoodCard = ({ food, setFoods }) => {
           >
             {deleting ? '' : <Trash2Icon className='size-5' />}
           </button>
-          <div className='col-span-full text-sm text-base-content/70'>
+          <div className='col-span-full text-sm text-base-content/70 leading-snug'>
             {food.calories} kcal • P {food.protein}g • C {food.carbs}g • F {food.fat}g
           </div>
         </div>

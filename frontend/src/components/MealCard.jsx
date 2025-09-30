@@ -52,18 +52,18 @@ const MealCard = ({ meal, setMeals }) => {
   }
 
   return (
-    <Link to={`/${date}/${encodeURIComponent(meal.name)}`} className='card bg-base-100 border border-base-content/10 shadow-sm'>
+    <Link to={`/${date}/${encodeURIComponent(meal.name)}`} className='card bg-base-100 border border-base-content/10 shadow-sm transition hover:shadow-md'>
       <div className='card-body gap-4'>
-        <div className='flex items-center justify-between'>
-          <div className='flex items-center gap-3'>
-            <span className='badge badge-primary badge-lg'>{meal?.name}</span>
-            <div className='text-sm text-base-content/70'>
+        <div className='flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between'>
+          <div className='flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center sm:gap-3'>
+            <span className='badge badge-primary badge-lg w-fit'>{meal?.name}</span>
+            <div className='text-sm text-base-content/70 leading-snug'>
               {totals.calories} kcal • P {totals.protein}g • C {totals.carbs}g • F {totals.fat}g
             </div>
           </div>
-          <button className='btn btn-sm btn-ghost'>
+          <button className='btn btn-ghost btn-sm w-full justify-center gap-2 sm:w-auto'>
             <PlusIcon className='size-4' />
-            Add Food
+            <span>Add Food</span>
           </button>
         </div>
 
@@ -77,14 +77,14 @@ const MealCard = ({ meal, setMeals }) => {
           const f = entry.food || {}
           const q = entry.quantity ?? 1
           return (
-            <div key={entry._id} className='flex items-center justify-between'>
+            <div key={entry._id} className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
               <div className='min-w-0'>
                 <div className='font-medium truncate'>{f.name || 'Unnamed food'}</div>
                 <div className='text-xs text-base-content/60 truncate'>
                   {f.brand ? `${f.brand} • ` : ''}Qty {q}
                 </div>
               </div>
-              <div className='flex items-center gap-4'>
+              <div className='flex flex-wrap items-center gap-3 sm:flex-nowrap sm:gap-4'>
                 <div className='text-sm tabular-nums text-base-content/80'>
                   {Math.round((f.calories || 0) * q)} kcal
                 </div>
@@ -92,7 +92,7 @@ const MealCard = ({ meal, setMeals }) => {
                   P {Math.round((f.protein || 0) * q)}g • C {Math.round((f.carbs || 0) * q)}g • F {Math.round((f.fat || 0) * q)}g
                 </div>
                 <button
-                  className={`btn btn-xs btn-ghost ${deletingId === entry._id ? 'loading' : ''}`}
+                  className={`btn btn-ghost btn-xs ${deletingId === entry._id ? 'loading' : ''}`}
                   onClick={(e) => handleDeleteFood(e, entry._id)}
                   aria-label='Remove food'
                 >

@@ -25,7 +25,10 @@ const HomePage = () => {
             await api.post("/days", { date });
             const res = await api.get(`/days/${date}/meals`);
             setMeals(res.data);
-          } catch (createErr) {
+          } catch (creationError) {
+            if (import.meta.env.DEV) {
+              console.error('Failed to seed meals for date', date, creationError)
+            }
             toast.error(`Failed to create entry for ${date}`);
           }
         } else {

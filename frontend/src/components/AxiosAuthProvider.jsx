@@ -12,15 +12,17 @@ const AxiosAuthProvider = () => {
         if (token) {
           config.headers = config.headers || {}
           config.headers.Authorization = `Bearer ${token}`
-          if (import.meta.env.MODE === 'development') {
-            // eslint-disable-next-line no-console
+          if (import.meta.env.DEV) {
             console.debug('[AxiosAuth] Attached token', token.slice(0, 12) + '...')
           }
-        } else if (import.meta.env.MODE === 'development') {
-          // eslint-disable-next-line no-console
+        } else if (import.meta.env.DEV) {
           console.debug('[AxiosAuth] No token available')
         }
-      } catch {}
+      } catch (error) {
+        if (import.meta.env.DEV) {
+          console.warn('[AxiosAuth] Failed to attach token', error)
+        }
+      }
       return config
     })
     return () => api.interceptors.request.eject(id)

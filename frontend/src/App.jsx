@@ -7,7 +7,6 @@ import FoodDetails from './pages/FoodDetails'
 import SignInPage from './pages/SignInPage'
 import SignUpPage from './pages/SignUpPage'
 import RequireAuth from './components/RequireAuth'
-import toast from 'react-hot-toast'
 
 const App = () => {
   return (
