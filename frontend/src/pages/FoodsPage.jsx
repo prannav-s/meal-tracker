@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import Navbar from '../components/Navbar'
-import { PlusIcon } from 'lucide-react'
+import { PlusIcon, CameraIcon } from 'lucide-react'
 import FoodCard from '../components/FoodCard'
 import FoodsNotFound from '../components/FoodsNotFound.jsx'
 import { useNavigate } from 'react-router'
@@ -49,6 +49,18 @@ const FoodsPage = () => {
       setLoading(false)
     }
   }
+
+  const addFoodFromImage = async () => {
+    try {
+      navigate('/foods/upload');
+    } catch (error) {
+      toast.error("Failed to open image upload", {
+        duration: 4000,
+        icon: "❌"
+      });
+      console.error("Error adding food from image", error);
+    }
+  }
   
 
   return (
@@ -63,6 +75,13 @@ const FoodsPage = () => {
           >
             <PlusIcon className='size-4' />
             <span>Add Food</span>
+          </button>
+          <button
+            className='btn btn-ghost btn-sm w-full justify-center gap-2 sm:w-auto'
+            onClick={addFoodFromImage}
+          >
+            <CameraIcon className='size-4' />
+            <span>Add from Image</span>
           </button>
         </div>
        )}

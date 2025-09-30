@@ -1,4 +1,4 @@
-import { PizzaIcon, PlusIcon } from "lucide-react";
+import { PizzaIcon, PlusIcon, CameraIcon } from "lucide-react";
 import { useNavigate } from "react-router";
 import toast from 'react-hot-toast';
 import api from '../lib/axios.js';
@@ -31,13 +31,22 @@ const FoodsNotFound = () => {
       <p className="text-base-content/70">
         Create a food to start tracking!
       </p>
-        <button
-          className='btn btn-primary w-full justify-center gap-2 sm:w-auto'
-          onClick={createNewFood}
-        >
-          <PlusIcon className='size-4' />
-          <span>Add Food</span>
-        </button>
+        <div className='flex w-full flex-col gap-3 sm:flex-row sm:justify-center'>
+          <button
+            className='btn btn-primary w-full justify-center gap-2 sm:w-auto'
+            onClick={createNewFood}
+          >
+            <PlusIcon className='size-4' />
+            <span>Add Food</span>
+          </button>
+          <button
+            className='btn btn-outline w-full justify-center gap-2 sm:w-auto'
+            onClick={() => navigate('/foods/upload')}
+          >
+            <CameraIcon className='size-4' />
+            <span>Add from Image</span>
+          </button>
+        </div>
     </div>
   );
 };

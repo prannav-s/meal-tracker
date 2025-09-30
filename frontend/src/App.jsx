@@ -4,6 +4,7 @@ import MealDetails from './pages/MealDetails'
 import CreateMeal from './pages/CreateMeal'
 import FoodsPage from './pages/FoodsPage'
 import FoodDetails from './pages/FoodDetails'
+import FoodsUploadPage from './pages/FoodsUploadPage'
 import SignInPage from './pages/SignInPage'
 import SignUpPage from './pages/SignUpPage'
 import RequireAuth from './components/RequireAuth'
@@ -21,6 +22,7 @@ const App = () => {
         <Route path="/:date/create" element={<RequireAuth><CreateMeal /></RequireAuth>} />
         <Route path="/:date/:mealName" element={<RequireAuth><MealDetails /></RequireAuth>} />
         <Route path="/foods" element={<RequireAuth><FoodsPage /></RequireAuth>} />
+        <Route path="/foods/upload" element={<RequireAuth><FoodsUploadPage /></RequireAuth>} />
         <Route path="/foods/:id" element={<RequireAuth><FoodDetails /></RequireAuth>} />
       </Routes>
     </div>
