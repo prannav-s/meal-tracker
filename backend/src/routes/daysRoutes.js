@@ -12,7 +12,8 @@ import {
   deleteMealFromDay,
   addFoodToMeal,
   updateFoodInMeal,
-  deleteFoodFromMeal
+  deleteFoodFromMeal, 
+  getFoodRecs
 } from "../controllers/daysController.js";
 
 const router = Router();
@@ -30,6 +31,7 @@ router.patch("/:date/meals/:mealName", updateMealForDay);
 router.delete("/:date/meals/:mealName", deleteMealFromDay);
 
 router.post("/:date/meals/:mealName/foods", addFoodToMeal);
+router.get("/:date/meals/:mealName/recs", getFoodRecs);
 router.patch("/:date/meals/:mealName/foods/:entryId", updateFoodInMeal);
 router.delete("/:date/meals/:mealName/foods/:entryId", deleteFoodFromMeal);
 

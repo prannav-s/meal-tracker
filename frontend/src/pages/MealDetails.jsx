@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react'
-import { useParams, Link, useNavigate } from 'react-router'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { useParams, useNavigate } from 'react-router'
 import Navbar from '../components/Navbar'
 import api from '../lib/axios.js'
 import toast from 'react-hot-toast'
@@ -17,6 +17,9 @@ const MealDetails = () => {
   const [addingId, setAddingId] = useState(null)
   const [deletingId, setDeletingId] = useState(null)
   const [qtyById, setQtyById] = useState({})
+  const [recs, setRecs] = useState([])
+  const [recsLoading, setRecsLoading] = useState(false)
+  const [recsError, setRecsError] = useState('')
 
   useEffect(() => {
     const load = async () => {
@@ -37,6 +40,36 @@ const MealDetails = () => {
     }
     load()
   }, [date, mealName])
+
+  const fetchRecs = useCallback(async () => {
+    setRecsLoading(true)
+    setRecsError('')
+    try {
+      const res = await api.get(
+        `/days/${date}/meals/${encodeURIComponent(mealName)}/recs`
+      )
+      const suggestions = res.data?.suggestions || []
+      setRecs(suggestions)
+      return true
+    } catch (e) {
+      console.error(e)
+      const msg = e?.response?.data?.error || 'Failed to load quick adds'
+      setRecsError(msg)
+      setRecs([])
+      return false
+    } finally {
+      setRecsLoading(false)
+    }
+  }, [date, mealName])
+
+  useEffect(() => {
+    fetchRecs()
+  }, [fetchRecs])
+
+  const handleRefreshRecs = useCallback(async () => {
+    const ok = await fetchRecs()
+    if (!ok) toast.error('Failed to load quick adds')
+  }, [fetchRecs])
 
   const totals = useMemo(() => {
     if (!meal) return { calories: 0, protein: 0, carbs: 0, fat: 0 }
@@ -59,6 +92,14 @@ const MealDetails = () => {
     setMeal(res.data)
   }
 
+  const foodsById = useMemo(() => {
+    const map = {}
+    foods.forEach((f) => {
+      map[String(f._id)] = f
+    })
+    return map
+  }, [foods])
+
   const filteredFoods = useMemo(() => {
     const q = query.trim().toLowerCase()
     if (!q) return foods
@@ -69,23 +110,54 @@ const MealDetails = () => {
     )
   }, [foods, query])
 
-  const handleAddFood = async (foodId) => {
+  const computeSuggestedQuantity = useCallback(
+    (suggestion) => {
+      if (!suggestion?.foodId) return 1
+      const base = foodsById[suggestion.foodId]
+      if (!base) return 1
+      const keys = ['calories', 'protein', 'carbs', 'fat']
+      const ratios = keys
+        .map((key) => {
+          const perUnit = Number(base[key] ?? 0)
+          const suggested = Number(suggestion?.macros?.[key] ?? 0)
+          if (!perUnit || !suggested) return null
+          return suggested / perUnit
+        })
+        .filter((value) => typeof value === 'number' && isFinite(value) && value > 0)
+      if (!ratios.length) return 1
+      const avg = ratios.reduce((sum, value) => sum + value, 0) / ratios.length
+      const rounded = Math.round(avg * 100) / 100
+      return Math.max(0.25, rounded || 1)
+    },
+    [foodsById]
+  )
+
+  const handleAddFood = async (foodId, quantityOverride) => {
     try {
       setAddingId(foodId)
-      const quantity = Number(qtyById[foodId] ?? 1) || 1
+      const quantity = quantityOverride ?? (Number(qtyById[foodId] ?? 1) || 1)
       await api.post(`/days/${date}/meals/${encodeURIComponent(mealName)}/foods`, {
         foodId,
         quantity,
       })
       await refreshMeal()
+      await fetchRecs()
       toast.success('Food added')
+      return true
     } catch (e) {
       const msg = e?.response?.data?.message || 'Failed to add food'
       toast.error(msg)
       console.error(e)
+      return false
     } finally {
       setAddingId(null)
     }
+  }
+
+  const handleQuickAdd = async (suggestion) => {
+    const quantity = computeSuggestedQuantity(suggestion)
+    setQtyById((s) => ({ ...s, [suggestion.foodId]: quantity }))
+    await handleAddFood(suggestion.foodId, quantity)
   }
 
   const handleDeleteEntry = async (entryId) => {
@@ -114,8 +186,84 @@ const MealDetails = () => {
         {loading ? (
           <div className='text-center text-primary py-10'>Loading…</div>
         ) : (
-          <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
-            <div className='lg:col-span-2'>
+          <div className='grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6'>
+            <div className='order-1 lg:col-span-2'>
+              <div className='card bg-base-100 border border-base-content/10'>
+                <div className='card-body gap-4'>
+                  <div className='flex items-center justify-between gap-3'>
+                    <h3 className='text-lg font-semibold'>Quick Adds</h3>
+                    <button
+                      className={`btn btn-ghost btn-xs ${recsLoading ? 'loading' : ''}`}
+                      onClick={handleRefreshRecs}
+                      disabled={recsLoading}
+                    >
+                      {recsLoading ? '' : 'Refresh'}
+                    </button>
+                  </div>
+                  {recsLoading ? (
+                    <div className='text-sm text-base-content/60'>Loading suggestions…</div>
+                  ) : recsError ? (
+                    <div className='space-y-2'>
+                      <div className='text-sm text-error'>{recsError}</div>
+                      <button className='btn btn-outline btn-xs' onClick={handleRefreshRecs}>
+                        Try again
+                      </button>
+                    </div>
+                  ) : recs.length === 0 ? (
+                    <div className='text-sm text-base-content/60'>No quick adds right now.</div>
+                  ) : (
+                    <div className='flex gap-3 overflow-x-auto pb-2'>
+                      {recs.map((rec, idx) => {
+                        const baseFood = foodsById[rec.foodId]
+                        const approxQuantity = computeSuggestedQuantity(rec)
+                        const macros = rec.macros || {}
+                        const calories = Math.round(Number(macros.calories ?? 0))
+                        const protein = Math.round(Number(macros.protein ?? 0))
+                        const carbs = Math.round(Number(macros.carbs ?? 0))
+                        const fat = Math.round(Number(macros.fat ?? 0))
+                        return (
+                          <div
+                            key={`${rec.foodId}-${idx}`}
+                            className='min-w-[220px] flex-1 rounded-lg border border-base-content/10 p-3'
+                          >
+                            <div className='flex h-full flex-col justify-between gap-3'>
+                              <div className='flex items-start justify-between gap-3'>
+                                <div className='min-w-0'>
+                                  <div className='font-medium truncate'>{rec.name}</div>
+                                  {rec.portion && (
+                                    <div className='text-xs text-base-content/60'>Portion: {rec.portion}</div>
+                                  )}
+                                  {baseFood && (
+                                    <div className='text-[10px] uppercase tracking-wide text-base-content/50'>
+                                      ≈ {approxQuantity}× saved serving
+                                    </div>
+                                  )}
+                                  <div className='text-xs text-base-content/70'>
+                                    {calories} kcal • P {protein}g • C {carbs}g • F {fat}g
+                                  </div>
+                                </div>
+                                <button
+                                  className={`btn btn-primary btn-xs ${addingId === rec.foodId ? 'loading' : ''}`}
+                                  onClick={() => handleQuickAdd(rec)}
+                                  disabled={addingId === rec.foodId}
+                                >
+                                  {addingId === rec.foodId ? '' : <PlusIcon className='size-3' />} Add
+                                </button>
+                              </div>
+                              {rec.why && (
+                                <div className='text-xs italic text-base-content/60'>{rec.why}</div>
+                              )}
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className='order-2 space-y-4'>
               <div className='card bg-base-100 border border-base-content/10'>
                 <div className='card-body'>
                   <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
@@ -168,7 +316,7 @@ const MealDetails = () => {
               </div>
             </div>
 
-            <div className='lg:col-span-1'>
+            <div className='order-3 space-y-4'>
               <div className='card bg-base-100 border border-base-content/10'>
                 <div className='card-body gap-4'>
                   <h3 className='text-lg font-semibold'>Add Foods</h3>
@@ -182,7 +330,10 @@ const MealDetails = () => {
 
                   <div className='max-h-96 space-y-3 overflow-auto pr-2'>
                     {filteredFoods.map((f) => (
-                      <div key={f._id} className='flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between'>
+                      <div
+                        key={f._id}
+                        className='flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between'
+                      >
                         <div className='min-w-0 flex-1'>
                           <div className='font-medium truncate'>{f.name}</div>
                           <div className='text-xs text-base-content/60 truncate'>
@@ -192,9 +343,11 @@ const MealDetails = () => {
                             {f.calories} kcal • P {f.protein}g • C {f.carbs}g • F {f.fat}g
                           </div>
                           {Array.isArray(f.tags) && f.tags.length > 0 && (
-                            <div className='flex flex-wrap gap-1 mt-1'>
+                            <div className='mt-1 flex flex-wrap gap-1'>
                               {f.tags.map((t, idx) => (
-                                <span key={idx} className='badge badge-accent badge-xs'>{t}</span>
+                                <span key={idx} className='badge badge-accent badge-xs'>
+                                  {t}
+                                </span>
                               ))}
                             </div>
                           )}
@@ -202,8 +355,9 @@ const MealDetails = () => {
                         <div className='flex w-full items-center gap-2 sm:w-auto sm:justify-end'>
                           <input
                             type='number'
-                            min={1}
-                            className='input input-bordered input-xs w-16'
+                            min={0.25}
+                            step='0.25'
+                            className='input input-bordered input-xs w-20'
                             value={qtyById[f._id] ?? 1}
                             onChange={(e) =>
                               setQtyById((s) => ({ ...s, [f._id]: e.target.value }))
@@ -212,6 +366,7 @@ const MealDetails = () => {
                           <button
                             className={`btn btn-primary btn-xs ${addingId === f._id ? 'loading' : ''}`}
                             onClick={() => handleAddFood(f._id)}
+                            disabled={addingId === f._id}
                           >
                             {addingId === f._id ? '' : <PlusIcon className='size-3' />} Add
                           </button>

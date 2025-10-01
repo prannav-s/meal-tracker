@@ -1,6 +1,8 @@
 import Day from "../models/Day.js";
 import Meal from "../models/Meal.js";
 import Food from "../models/Food.js";
+import { getMealRecs } from "../ai/foodRecs.js";
+
 
 export async function getAllDays(req, res) {
     try {
@@ -12,6 +14,50 @@ export async function getAllDays(req, res) {
         console.log("Error getting all days", error);
         res.status(500).json({ message: "Error fetching days" });
     }
+}
+
+export async function getFoodRecs(req, res) {
+  try {
+    const userId = req.auth?.userId;
+    const { date, mealName } = req.params
+    if (!userId) return res.status(401).json({ message: "Unauthorized" });
+    
+    const day = await Day.findOne({ userId, date });
+
+    if (!day) return res.status(404).json({ message: "Day not found" });
+
+    const meal = await Meal.findOne({ day: day._id, name: mealName }).populate('foods.food');
+
+    if (!meal) {
+        return res.status(404).json({ message: "Meal not found" });
+    }
+    const foods = await Food.find({ userId }).lean();
+    const mealFoods = (meal.foods || [])
+      .map(entry => {
+        const foodDoc = entry.food;
+        if (!foodDoc) return null;
+        return {
+          _id: foodDoc._id,
+          name: foodDoc.name,
+          brand: foodDoc.brand,
+          calories: foodDoc.calories,
+          protein: foodDoc.protein,
+          carbs: foodDoc.carbs,
+          fat: foodDoc.fat,
+          tags: foodDoc.tags || [],
+          quantity: entry.quantity ?? 1
+        };
+      })
+      .filter(Boolean);
+
+    const suggestions = await getMealRecs({ mealFoods, mealName, foods });
+    if (!suggestions.length) return res.status(422).json({ error: "No foods detected" });
+
+    return res.json({ suggestions });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Extraction failed" });
+  }
 }
 
 export async function createDay(req, res) {

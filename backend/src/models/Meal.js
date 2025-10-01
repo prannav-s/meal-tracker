@@ -9,7 +9,7 @@ const mealSchema = new Schema({
     },
     foods: [{
         food: { type: Schema.Types.ObjectId, ref: 'Food', required: true },
-        quantity: { type: Number, min: 1, default: 1, require: true },
+        quantity: { type: Number, min: 0, default: 1, require: true },
     }],
 }, { timestamps: true });
 
