@@ -84,9 +84,8 @@ export async function getMealRecs({ mealFoods, mealName, foods }) {
     "You are a nutrition assistant.",
     "Pick 3–5 foods from the provided candidates (do not invent new foods).",
     "Reccomendation context should be given independently of other recommendations.",
-    "Ensure foods are tailored to the specific meal you are targeting",
+    "Ensure foods are tailored and standard for the target meal",
     "Propose practical portion sizes that help close any dietary gaps.",
-    "If gaps are nearly closed, favor balance and variety.",
     "Return strictly valid JSON matching the supplied JSON Schema. No extra keys."
   ].join("\n");
 
