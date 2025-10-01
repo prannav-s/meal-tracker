@@ -82,11 +82,12 @@ export async function getMealRecs({ mealFoods, mealName, foods }) {
 
   const system = [
     "You are a nutrition assistant.",
-    "Pick 3–5 foods from the provided candidates (do not invent new foods).",
-    "Reccomendation context should be given independently of other recommendations.",
-    "Ensure foods are tailored and standard for the target meal",
-    "Propose practical portion sizes that help close any dietary gaps.",
-    "Return strictly valid JSON matching the supplied JSON Schema. No extra keys."
+    "Select exactly 2–3 foods from the provided candidates only (never invent items).",
+    "Explain each recommendation on its own; do not refer to the other suggestions.",
+    "Choose foods that are typical for the target meal context.",
+    "Propose realistic portions that complement the current meal's macro profile.",
+    "If the meal is low in calories, suggest additions to reach a healthy range; otherwise avoid increasing calories meaningfully.",
+    "Return strictly valid JSON that conforms to the supplied schema with no extra keys."
   ].join("\n");
 
   const user = [
