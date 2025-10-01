@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import Navbar from '../components/Navbar'
 import { PlusIcon, CameraIcon } from 'lucide-react'
 import FoodCard from '../components/FoodCard'
@@ -13,6 +13,7 @@ const FoodsPage = () => {
   const [foods, setFoods] = useState([])
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
+  const [query, setQuery] = useState('')
 
   useEffect(() => {
     const fetchFoods = async () => {
@@ -29,6 +30,16 @@ const FoodsPage = () => {
     };
     fetchFoods();
   }, []);
+
+  const filteredFoods = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    if (!q) return foods
+    return foods.filter((f) =>
+      [f.name, f.brand, ...(f.tags || [])]
+        .filter(Boolean)
+        .some((s) => String(s).toLowerCase().includes(q))
+    )
+  }, [foods, query])
   
   const createNewFood = async () => {
     try {
@@ -69,6 +80,15 @@ const FoodsPage = () => {
       <div className='mx-auto mt-6 max-w-7xl px-4 pb-8'>
        {foods.length > 0 && (
         <div className='mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-end'>
+          <input
+            type='text'
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder='Search foods by name, brand, or tag'
+            className='input input-bordered w-full'
+          />
+
+          
           <button
             className='btn btn-ghost btn-sm w-full justify-center gap-2 sm:w-auto'
             onClick={createNewFood}
@@ -89,9 +109,9 @@ const FoodsPage = () => {
         {foods.length === 0 && <FoodsNotFound />}
         {foods.length > 0 && (
           <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
-            {foods.map((food) => (
-              <div key={food._id || food.id}>
-                <FoodCard food={food} setFoods={setFoods} />
+            {filteredFoods.map((filteredFoods) => (
+              <div key={filteredFoods._id || filteredFoods.id}>
+                <FoodCard food={filteredFoods} setFoods={setFoods} />
               </div>
             ))}
           </div>
