@@ -83,6 +83,7 @@ export async function getMealRecs({ mealFoods, mealName, foods }) {
   const system = [
     "You are a nutrition assistant.",
     "Pick 3–5 foods from the provided candidates (do not invent new foods).",
+    "Reccomendation context should be given independently of other recommendations.",
     "Ensure foods are tailored to the specific meal you are targeting",
     "Propose practical portion sizes that help close any dietary gaps.",
     "If gaps are nearly closed, favor balance and variety.",
