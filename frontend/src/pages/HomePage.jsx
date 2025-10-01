@@ -11,7 +11,7 @@ const HomePage = () => {
   const [meals, setMeals] = useState([])
   const [loading, setLoading] = useState(true)
   const [foods, setFoods] = useState([])
-  const [showQuickAdds, setShowQuickAdds] = useState(true)
+  const [showQuickAdds, setShowQuickAdds] = useState(False)
 
   const { date: routeDate } = useParams();
   const date = routeDate || new Date().toISOString().split("T")[0];
