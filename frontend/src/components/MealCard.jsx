@@ -121,20 +121,16 @@ const MealCard = ({ meal, setMeals, foods = [], showQuickAdds = true }) => {
 
   const handleDeleteFood = async (e, entryId) => {
     e.preventDefault();
-
-    if (window.confirm("Remove this food from the meal?")) {
-
-        try {
-        setDeletingId(entryId)
-        await api.delete(`/days/${date}/meals/${meal.name}/foods/${entryId}`)
-        await refreshMeals()
-        } catch (e) {
-        // no-op; Home has toasts for global errors
-        console.error(e)
-        } finally {
-        setDeletingId(null)
-        }
-    }
+      try {
+      setDeletingId(entryId)
+      await api.delete(`/days/${date}/meals/${meal.name}/foods/${entryId}`)
+      await refreshMeals()
+      } catch (e) {
+      // no-op; Home has toasts for global errors
+      console.error(e)
+      } finally {
+      setDeletingId(null)
+      }
   }
 
   return (
