@@ -109,9 +109,9 @@ const FoodsPage = () => {
         {foods.length === 0 && <FoodsNotFound />}
         {foods.length > 0 && (
           <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
-            {filteredFoods.map((filteredFoods) => (
-              <div key={filteredFoods._id || filteredFoods.id}>
-                <FoodCard food={filteredFoods} setFoods={setFoods} />
+            {filteredFoods.map((f) => (
+              <div key={f._id || f.id}>
+                <FoodCard food={f} setFoods={setFoods} />
               </div>
             ))}
           </div>

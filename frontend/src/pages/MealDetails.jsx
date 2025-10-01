@@ -141,8 +141,8 @@ const MealDetails = () => {
         quantity,
       })
       await refreshMeal()
-      await fetchRecs()
       toast.success('Food added')
+      await fetchRecs()
       return true
     } catch (e) {
       const msg = e?.response?.data?.message || 'Failed to add food'

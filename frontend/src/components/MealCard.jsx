@@ -106,8 +106,8 @@ const MealCard = ({ meal, setMeals, foods = [], showQuickAdds = true }) => {
           quantity,
         })
         await refreshMeals()
-        if (showQuickAdds) await fetchRecs()
         toast.success('Food added')
+        if (showQuickAdds) await fetchRecs()
       } catch (error) {
         console.error(error)
         const msg = error?.response?.data?.message || 'Failed to add food'
